@@ -61,18 +61,12 @@ function vanta_effects_settings_page()
                     <th scope="row">Sun Color (Base)</th>
                     <td><input type="text" name="vanta_sun_color" class="color-picker" value="<?php echo esc_attr(get_option('vanta_sun_color', '#ffffff')); ?>" /></td>
                 </tr>
-                <tr>
-                    <th scope="row">Sun Glare Color</th>
-                    <td><input type="text" name="vanta_sun_glare_color" class="color-picker" value="<?php echo esc_attr(get_option('vanta_sun_glare_color', '#ff6633')); ?>" /></td>
-                </tr>
+              
                 <tr>
                     <th scope="row">Sunlight Color</th>
                     <td><input type="text" name="vanta_sunlight_color" class="color-picker" value="<?php echo esc_attr(get_option('vanta_sunlight_color', '#ffcc00')); ?>" /></td>
                 </tr>
-                <tr>
-                    <th scope="row">Speed (e.g. 1)</th>
-                    <td><input type="number" step="0.1" name="vanta_speed" value="<?php echo esc_attr(get_option('vanta_speed', '1')); ?>" /></td>
-                </tr>
+               
             </table>
             <?php submit_button(); ?>
         </form>
