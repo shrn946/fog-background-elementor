@@ -1,98 +1,112 @@
 <?php
 /*
-Plugin Name: Animated Fog Background
-Description: Adds a customizable Vanta.js Clouds background effect with Elementor support.
+Plugin Name: Vanta Background Settings
+Description: Adds customizable Vanta.js background options to your WordPress site.
 Version: 1.1
-Author: WP DESIGN LAB
+Author: Your Name
 */
 
-add_action('admin_menu', function () {
-    add_options_page('Vanta Background Settings', 'Vanta Background', 'manage_options', 'vanta-effects-admin', 'vanta_effects_settings_page');
-});
+add_action('admin_menu', 'vanta_effects_menu');
+add_action('admin_init', 'vanta_effects_settings');
+add_action('admin_enqueue_scripts', 'vanta_admin_scripts');
+add_action('wp_enqueue_scripts', 'vanta_frontend_scripts');
 
-// Admin settings registration
-add_action('admin_init', function () {
-    register_setting('vanta_effects_group', 'vanta_sky_color'); // mapped to highlightColor
-    register_setting('vanta_effects_group', 'vanta_cloud_color'); // mapped to midtoneColor
-    register_setting('vanta_effects_group', 'vanta_cloud_shadow_color'); // mapped to lowlightColor
-    register_setting('vanta_effects_group', 'vanta_sun_color'); // mapped to baseColor
-    register_setting('vanta_effects_group', 'vanta_speed'); // used directly
-    register_setting('vanta_effects_group', 'vanta_sun_glare_color');
-    register_setting('vanta_effects_group', 'vanta_sunlight_color');
-});
+function vanta_effects_menu() {
+    add_options_page('Vanta Background Settings', 'Vanta Background', 'manage_options', 'vanta-background-settings', 'vanta_effects_settings_page');
+}
 
-// Settings page output
-function vanta_effects_settings_page()
-{
+function vanta_effects_settings() {
+    $fields = [
+        'vanta_sky_color',
+        'vanta_cloud_color',
+        'vanta_cloud_shadow_color',
+        'vanta_sun_color',
+        'vanta_speed',
+        'vanta_blur_factor',
+        'vanta_zoom',
+        'vanta_css_class',
+    ];
+    foreach ($fields as $field) {
+        register_setting('vanta_effects_group', $field);
+    }
+}
+
+function vanta_admin_scripts($hook) {
+    if ($hook !== 'settings_page_vanta-background-settings') return;
+    wp_enqueue_style('wp-color-picker');
+    wp_enqueue_script('wp-color-picker');
+}
+
+function vanta_effects_settings_page() {
     ?>
     <div class="wrap">
         <h1>Vanta Background Settings</h1>
-        <p><strong>Short Instruction to Use Vanta.Fog in Elementor:</strong></p>
-        <ol>
-            <li>In Elementor, select the section or container you want the effect on.</li>
-            <li>Go to Advanced → CSS Classes.</li>
-            <li>Add the class: vanta-bg</li>
-            <li>Make sure the necessary JS is loaded:
-                <ul>
-                    <li>three.min.js</li>
-                    <li>vanta.fog.min.js</li>
-                    <li>Your custom init script</li>
-                </ul>
-            </li>
-        </ol>
-
         <form method="post" action="options.php">
             <?php settings_fields('vanta_effects_group'); ?>
-            <?php do_settings_sections('vanta_effects_group'); ?>
             <table class="form-table">
                 <tr>
-                    <th scope="row">Sky Color (Highlight)</th>
-                    <td><input type="text" name="vanta_sky_color" class="color-picker" value="<?php echo esc_attr(get_option('vanta_sky_color', '#224e64')); ?>" /></td>
+                    <th scope="row">highlightColor</th>
+                    <td><input type="text" name="vanta_sky_color" value="<?php echo esc_attr(get_option('vanta_sky_color', '#224e64')); ?>" class="vanta-color-picker" /></td>
                 </tr>
                 <tr>
-                    <th scope="row">FOG Color (Midtone)</th>
-                    <td><input type="text" name="vanta_cloud_color" class="color-picker" value="<?php echo esc_attr(get_option('vanta_cloud_color', '#4e88dc')); ?>" /></td>
+                    <th scope="row">midtoneColor</th>
+                    <td><input type="text" name="vanta_cloud_color" value="<?php echo esc_attr(get_option('vanta_cloud_color', '#4e88dc')); ?>" class="vanta-color-picker" /></td>
                 </tr>
                 <tr>
-                    <th scope="row">FOG Shadow Color (Lowlight)</th>
-                    <td><input type="text" name="vanta_cloud_shadow_color" class="color-picker" value="<?php echo esc_attr(get_option('vanta_cloud_shadow_color', '#0c202a')); ?>" /></td>
+                    <th scope="row">lowlightColor</th>
+                    <td><input type="text" name="vanta_cloud_shadow_color" value="<?php echo esc_attr(get_option('vanta_cloud_shadow_color', '#0c202a')); ?>" class="vanta-color-picker" /></td>
                 </tr>
                 <tr>
-                    <th scope="row">Sun Color (Base)</th>
-                    <td><input type="text" name="vanta_sun_color" class="color-picker" value="<?php echo esc_attr(get_option('vanta_sun_color', '#ffffff')); ?>" /></td>
+                    <th scope="row">baseColor</th>
+                    <td><input type="text" name="vanta_sun_color" value="<?php echo esc_attr(get_option('vanta_sun_color', '#ffffff')); ?>" class="vanta-color-picker" /></td>
                 </tr>
-              
-               
                 <tr>
-                    <th scope="row">Speed (e.g. 1)</th>
+                    <th scope="row">Animation Speed</th>
                     <td><input type="number" step="0.1" name="vanta_speed" value="<?php echo esc_attr(get_option('vanta_speed', '1')); ?>" /></td>
                 </tr>
+                <tr>
+                    <th scope="row">Blur Factor</th>
+                    <td><input type="number" step="0.1" name="vanta_blur_factor" value="<?php echo esc_attr(get_option('vanta_blur_factor', '0.5')); ?>" /></td>
+                </tr>
+                <tr>
+                    <th scope="row">Zoom</th>
+                    <td><input type="number" step="0.1" name="vanta_zoom" value="<?php echo esc_attr(get_option('vanta_zoom', '1.0')); ?>" /></td>
+                </tr>
+               <tr>
+    <th scope="row">CSS Classes to Target</th>
+    <td>
+      <input type="text" name="vanta_css_class" value="<?php echo esc_attr(get_option('vanta_css_class', 'vanta-bg')); ?>" />
+<p class="description">Enter class names separated by **space or comma**. Example: <code>vanta-bg, hero-section banner-bg</code></p>
+
+    </td>
+</tr>
             </table>
             <?php submit_button(); ?>
         </form>
     </div>
+    <script>
+        jQuery(document).ready(function ($) {
+            $('.vanta-color-picker').wpColorPicker();
+        });
+    </script>
     <?php
 }
 
-// Enqueue color picker for admin
-add_action('admin_enqueue_scripts', function () {
-    wp_enqueue_style('wp-color-picker');
-    wp_enqueue_script('vanta-color-picker', plugin_dir_url(__FILE__) . 'color-picker.js', ['wp-color-picker'], false, true);
-});
-
-// Frontend scripts
-add_action('wp_enqueue_scripts', function () {
+function vanta_frontend_scripts() {
     wp_enqueue_script('three-js', 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js', [], null, true);
     wp_enqueue_script('vanta-fog', 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js', ['three-js'], null, true);
     wp_enqueue_script('vanta-init', plugin_dir_url(__FILE__) . 'vanta-init.js', ['three-js', 'vanta-fog'], null, true);
 
     $options = [
         'highlightColor' => get_option('vanta_sky_color', '#224e64'),
-        'midtoneColor' => get_option('vanta_cloud_color', '#4e88dc'),
-        'lowlightColor' => get_option('vanta_cloud_shadow_color', '#0c202a'),
-        'baseColor' => get_option('vanta_sun_color', '#ffffff'),
-        'speed' => get_option('vanta_speed', '1')
+        'midtoneColor'   => get_option('vanta_cloud_color', '#4e88dc'),
+        'lowlightColor'  => get_option('vanta_cloud_shadow_color', '#0c202a'),
+        'baseColor'      => get_option('vanta_sun_color', '#ffffff'),
+        'speed'          => (float) get_option('vanta_speed', '1'),
+        'blurFactor'     => (float) get_option('vanta_blur_factor', '0.5'),
+        'zoom'           => (float) get_option('vanta_zoom', '1.0'),
+        'cssClass'       => get_option('vanta_css_class', 'vanta-bg'),
     ];
 
     wp_localize_script('vanta-init', 'vantaOptions', $options);
-});
+}
